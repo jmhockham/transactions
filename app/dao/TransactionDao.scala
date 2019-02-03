@@ -20,10 +20,10 @@ class TransactionDao @Inject()(protected val dbConfigProvider: DatabaseConfigPro
 
   def all(): Future[Seq[Transaction]] = db.run(transactions.result)
 
-  def findTransaction(id: UUID): Future[Seq[Transaction]] = {
+  def findTransaction(id: UUID): Future[Transaction] = {
     db.run(transactions.filter{ t =>
       t.id === id
-    }.result)
+    }.result).map(_.head)
   }
 
   def findMultipleTransactions(ids: Seq[UUID]): Future[Seq[Transaction]] = {

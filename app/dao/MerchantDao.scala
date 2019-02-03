@@ -20,7 +20,24 @@ class MerchantDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
 
   def all(): Future[Seq[Merchant]] = db.run(merchants.result)
 
-  private class MerchantTable(tag: Tag) extends Table[Merchant](tag, "merchant") {
+  //TODO location lookup/modelling on parent (requires dao)
+  def findMerchant(id: UUID): Future[Merchant] = {
+    db.run(merchants.filter{ m =>
+      m.id === id
+    }.result).map(_.head)
+  }
+
+  def findMultipleMerchants(ids: Seq[UUID]): Future[Seq[Merchant]] = {
+    db.run(merchants.filter{ m =>
+      m.id inSetBind ids
+    }.result)
+  }
+
+  def update(m: Merchant): Unit = {
+    db.run(merchants.insertOrUpdate(m))
+  }
+
+  private class MerchantTable(tag: Tag) extends Table[Merchant](tag, "merchants") {
     def id = column[UUID]("id")
     def name = column[Option[String]]("name")
     def logoUrl = column[Option[String]]("logo_url")
