@@ -6,8 +6,8 @@ import java.util.UUID
 case class Transaction
 (
   id: UUID,
-  merchantId: Option[String],
-  locationId: Option[String],
+  merchantId: Option[UUID],
+  locationId: Option[UUID],
   cardScheme: Option[String],
   bin: Option[String],
   lastFour: Option[String],
@@ -20,6 +20,6 @@ case class Transaction
   updatedDate: Timestamp,
   merchantName: Option[String],
   candidates: String,
-  matchedWith: Option[String]
+  matchedWith: Option[UUID]
 
 )

@@ -38,8 +38,8 @@ class TransactionDao @Inject()(protected val dbConfigProvider: DatabaseConfigPro
 
   private class TransactionTable(tag:Tag) extends Table[Transaction](tag,"transactions"){
     def id = column[UUID]("id")
-    def merchantId = column[Option[String]]("merchant_id")
-    def locationId = column[Option[String]]("location_id")
+    def merchantId = column[Option[UUID]]("merchant_id")
+    def locationId = column[Option[UUID]]("location_id")
     def cardScheme = column[Option[String]]("card_scheme")
     def bin = column[Option[String]]("bin")
     def lastFour = column[Option[String]]("last_four")
@@ -52,7 +52,7 @@ class TransactionDao @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     def updatedDate = column[Timestamp]("updated_date", O.SqlType("timestamp with time zone"))
     def merchantName = column[Option[String]]("merchant_name")
     def candidates = column[String]("candidates")
-    def matchedWith = column[Option[String]]("matched_with")
+    def matchedWith = column[Option[UUID]]("matched_with")
 
     override def * : ProvenShape[Transaction] = (id, merchantId, locationId, cardScheme, bin,
       lastFour, provider, source, amount, transactionDate, state, createdDate, updatedDate, merchantName,
