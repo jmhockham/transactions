@@ -46,25 +46,23 @@ class TransactionDao @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   }
 
   def updateMatching(id:UUID, matchingId: UUID): Future[Boolean] = db.run {
-    val updateState = for {t <- transactions if t.id === id  } yield t.state
-    updateState.update("MATCHED")
-
-    val updateMatching = for {t <- transactions if t.id === id  } yield t.matchedWith
-    updateMatching.update(Some(matchingId)).map {
-      case 0 => false
-      case _ => true
-    }
+    transactions.filter(_.id === id)
+      .map( t => (t.state, t.matchedWith) )
+      .update(("MATCHED",Some(matchingId)))
+      .map{
+        case 0 => false
+        case _ => true
+      }
   }
 
   def updateMatchingReset(id:UUID): Future[Boolean] = db.run {
-    val updateState = for {t <- transactions if t.id === id  } yield t.state
-    updateState.update("UNMATCHED")
-
-    val updateMatching = for {t <- transactions if t.id === id  } yield t.matchedWith
-    updateMatching.update(None).map {
-      case 0 => false
-      case _ => true
-    }
+    transactions.filter(_.id === id)
+      .map( t => (t.state, t.matchedWith) )
+      .update(("UNMATCHED",None))
+      .map{
+        case 0 => false
+        case _ => true
+      }
   }
 
   private class TransactionTable(tag:Tag) extends Table[Transaction](tag,"transactions"){
