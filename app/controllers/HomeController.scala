@@ -1,5 +1,6 @@
 package controllers
 
+import java.util.UUID
 import javax.inject._
 
 import dao.{MerchantDao, TransactionDao}
@@ -43,5 +44,30 @@ class HomeController @Inject()(
   }
 
   //TODO routing/requests for actions
+
+  def getTransaction(id: UUID) = Action {
+    val transaction = Await.result(transactionDao.findTransaction(id), 5 minutes)
+    Ok(transaction.toString)
+  }
+
+  def getMerchant(id: UUID ) = Action {
+    val merchant = Await.result(merchantDao.findMerchant(id), 5 minutes)
+    Ok(merchant.toString)
+  }
+
+  def getTransactionStates(state: String = "") = Action {
+    val transactions = Await.result(transactionDao.all(), 5 minutes)
+    val stateCount = collection.mutable.Map[String, Int]()
+    transactions.map { t =>
+      val count = stateCount.getOrElse(t.state.toUpperCase, 0)
+      stateCount.put(t.state.toUpperCase, count+1)
+    }
+    if (state != null && state.nonEmpty) {
+      Ok(s"$state: ${stateCount.getOrElse(state.toUpperCase, 0)}")
+    }
+    else{
+      Ok(stateCount.toString())
+    }
+  }
 
 }

@@ -19,7 +19,8 @@ libraryDependencies ++= Seq(
 libraryDependencies += "com.h2database" % "h2" % "1.4.193"
 libraryDependencies += "org.postgresql" % "postgresql" % "42.2.5"
 libraryDependencies += "org.scalaj" %% "scalaj-http" % "2.4.1"
-//libraryDependencies += "com.zaxxer" % "HikariCP" % "2.7.9"
+
+routesImport += "play.api.mvc.PathBindable.bindableUUID"
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )  
 
