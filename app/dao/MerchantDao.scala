@@ -16,7 +16,7 @@ class MerchantDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
 
   import profile.api._
 
-  private val merchants = TableQuery[MerchantTable]
+  val merchants = TableQuery[MerchantTable]
 
   def all(): Future[Seq[Merchant]] = db.run(merchants.result)
 
@@ -37,7 +37,7 @@ class MerchantDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     db.run(merchants.insertOrUpdate(m))
   }
 
-  private class MerchantTable(tag: Tag) extends Table[Merchant](tag, "merchants") {
+  class MerchantTable(tag: Tag) extends Table[Merchant](tag, "merchants") {
     def id = column[UUID]("id")
     def name = column[Option[String]]("name")
     def logoUrl = column[Option[String]]("logo_url")

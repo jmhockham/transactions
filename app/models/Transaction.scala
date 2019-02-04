@@ -15,11 +15,10 @@ case class Transaction
   source: String,
   amount: Int,
   transactionDate: Timestamp,
-  state: String,
+  var state: String,
   createdDate: Timestamp,
   updatedDate: Timestamp,
   merchantName: Option[String],
   candidates: String,
-  matchedWith: Option[UUID]
-
+  var matchedWith: Option[UUID]
 )

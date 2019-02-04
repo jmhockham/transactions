@@ -9,7 +9,8 @@ import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 import slick.lifted.ProvenShape
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.duration._
 
 class TransactionDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
   extends HasDatabaseConfigProvider[JdbcProfile]{
@@ -32,8 +33,38 @@ class TransactionDao @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     }.result)
   }
 
-  def update(t: Transaction): Unit = {
-    db.run(transactions.insertOrUpdate(t))
+  def matchTransactions(firstId:UUID, secondId:UUID): Boolean = {
+    val firstResult = Await.result(updateMatching(firstId, secondId), 5 minutes)
+    val secondResult = Await.result(updateMatching(secondId, firstId), 5 minutes)
+    firstResult && secondResult
+  }
+
+  def unmatchTransactions(firstId:UUID, secondId:UUID): Boolean = {
+    val firstResult = Await.result(updateMatchingReset(firstId), 5 minutes)
+    val secondResult = Await.result(updateMatchingReset(secondId), 5 minutes)
+    firstResult && secondResult
+  }
+
+  def updateMatching(id:UUID, matchingId: UUID): Future[Boolean] = db.run {
+    val updateState = for {t <- transactions if t.id === id  } yield t.state
+    updateState.update("MATCHED")
+
+    val updateMatching = for {t <- transactions if t.id === id  } yield t.matchedWith
+    updateMatching.update(Some(matchingId)).map {
+      case 0 => false
+      case _ => true
+    }
+  }
+
+  def updateMatchingReset(id:UUID): Future[Boolean] = db.run {
+    val updateState = for {t <- transactions if t.id === id  } yield t.state
+    updateState.update("UNMATCHED")
+
+    val updateMatching = for {t <- transactions if t.id === id  } yield t.matchedWith
+    updateMatching.update(None).map {
+      case 0 => false
+      case _ => true
+    }
   }
 
   private class TransactionTable(tag:Tag) extends Table[Transaction](tag,"transactions"){

@@ -11,12 +11,16 @@ import slick.lifted.ProvenShape
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class LocationDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit executionContext: ExecutionContext)
+class LocationDao @Inject()
+(
+  protected val dbConfigProvider: DatabaseConfigProvider,
+  protected val merchantDao: MerchantDao
+)(implicit executionContext: ExecutionContext)
   extends HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
 
-  private val locations = TableQuery[LocationTable]
+  val locations = TableQuery[LocationTable]
 
   def all(): Future[Seq[Location]] = db.run(locations.result)
 
@@ -26,9 +30,10 @@ class LocationDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     }.result).map(_.head)
   }
 
-  private class LocationTable(tag: Tag) extends Table[Location](tag, "locations") {
+  class LocationTable(tag: Tag) extends Table[Location](tag, "locations") {
     def id = column[UUID]("id")
     def merchantId = column[UUID]("merchant_id")
+    def merchant = foreignKey("merchants",merchantId, merchantDao.merchants)(_.id)
     def name = column[String]("name")
     def latitude = column[Double]("latitude")
     def longitude = column[Double]("longitude")
