@@ -7,7 +7,7 @@ import java.util.UUID
 case class Location
 (
   id: UUID,
-  merchant_id: UUID,
+  merchantId: UUID,
   name: String,
   latitude: Double,
   longitude: Double,

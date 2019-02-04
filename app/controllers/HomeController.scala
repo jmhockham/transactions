@@ -59,9 +59,18 @@ class HomeController @Inject()(
     Ok(transaction.toString)
   }
 
-  def getMerchant(id: UUID ) = Action {
+  def getMerchant(id: UUID) = Action {
     val merchant = Await.result(merchantDao.findMerchant(id), 5 minutes)
     Ok(merchant.toString)
+  }
+
+  def getMerchantByName(name: String) = Action {
+    val merchants = Await.result(merchantDao.findMerchantsByName(name), 5 minutes)
+    val merchantsWithLocations = merchants.map { m =>
+      val locations = Await.result(locationDao.findLocationsFromMerchant(m.id), 5 minutes)
+      s"Merchant [$name] has the following locations: ${locations.mkString("\n")}"
+    }
+    Ok(merchantsWithLocations.mkString("\n\n"))
   }
 
   def getTransactionStates(state: String = "") = Action {
@@ -76,6 +85,52 @@ class HomeController @Inject()(
     }
     else{
       Ok(stateCount.toString())
+    }
+  }
+
+  def matchTransactions = Action { request =>
+    request.body.asJson.map { json =>
+      val firstIdOpt = (json \ "firstId").asOpt[UUID]
+      val secondIdOpt = (json \ "secondId").asOpt[UUID]
+      if(firstIdOpt.isEmpty || secondIdOpt.isEmpty){
+        BadRequest("Missing parameters: must have two uuid's called 'firstId' and 'secondId'")
+      }
+      else{
+        val firstId = firstIdOpt.head
+        val secondId = secondIdOpt.head
+        val result = transactionDao.matchTransactions(firstId, secondId)
+        if(result){
+          Ok(s"Transactions with ids \n[$firstId] \nand \n[$secondId] are now matched")
+        }
+        else{
+          InternalServerError("Could not match transactions")
+        }
+      }
+    }.getOrElse{
+      BadRequest("Expecting json body")
+    }
+  }
+
+  def unmatchTransactions = Action { request =>
+    request.body.asJson.map { json =>
+      val firstIdOpt = (json \ "firstId").asOpt[UUID]
+      val secondIdOpt = (json \ "secondId").asOpt[UUID]
+      if(firstIdOpt.isEmpty || secondIdOpt.isEmpty){
+        BadRequest("Missing parameters: must have two uuid's called 'firstId' and 'secondId'")
+      }
+      else{
+        val firstId = firstIdOpt.head
+        val secondId = secondIdOpt.head
+        val result = transactionDao.unmatchTransactions(firstId, secondId)
+        if(result){
+          Ok(s"Transactions with ids \n[$firstId] \nand \n[$secondId] are now unmatched")
+        }
+        else{
+          InternalServerError("Could not unmatch transactions")
+        }
+      }
+    }.getOrElse{
+      BadRequest("Expecting json body")
     }
   }
 

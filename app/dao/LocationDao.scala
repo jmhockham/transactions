@@ -30,6 +30,12 @@ class LocationDao @Inject()
     }.result).map(_.head)
   }
 
+  def findLocationsFromMerchant(merchantId: UUID): Future[Seq[Location]] = {
+    db.run(locations.filter{ l =>
+      l.merchantId === merchantId
+    }.result)
+  }
+
   class LocationTable(tag: Tag) extends Table[Location](tag, "locations") {
     def id = column[UUID]("id")
     def merchantId = column[UUID]("merchant_id")

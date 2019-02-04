@@ -27,6 +27,12 @@ class MerchantDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     }.result).map(_.head)
   }
 
+  def findMerchantsByName(name: String): Future[Seq[Merchant]] = {
+    db.run(merchants.filter{ m =>
+      m.name === name
+    }.result)
+  }
+
   def findMultipleMerchants(ids: Seq[UUID]): Future[Seq[Merchant]] = {
     db.run(merchants.filter{ m =>
       m.id inSetBind ids
