@@ -20,7 +20,6 @@ class MerchantDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
 
   def all(): Future[Seq[Merchant]] = db.run(merchants.result)
 
-  //TODO location lookup/modelling on parent (requires dao)
   def findMerchant(id: UUID): Future[Merchant] = {
     db.run(merchants.filter{ m =>
       m.id === id

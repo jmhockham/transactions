@@ -27,6 +27,12 @@ class TransactionDao @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     }.result).map(_.head)
   }
 
+  def findTransactionsByState(state: String): Future[Seq[Transaction]] = {
+    db.run(transactions.filter{ t =>
+      t.state === state
+    }.result)
+  }
+
   def findMultipleTransactions(ids: Seq[UUID]): Future[Seq[Transaction]] = {
     db.run(transactions.filter{ t =>
       t.id inSetBind ids

@@ -52,8 +52,6 @@ class HomeController @Inject()(
     Ok(views.html.index("Your new application is ready."))
   }
 
-  //TODO routing/requests for actions
-
   def getTransaction(id: UUID) = Action {
     val transaction = Await.result(transactionDao.findTransaction(id), 5 minutes)
     Ok(transaction.toString)
@@ -73,7 +71,7 @@ class HomeController @Inject()(
     Ok(merchantsWithLocations.mkString("\n\n"))
   }
 
-  def getTransactionStates(state: String = "") = Action {
+  def getTransactionStateCount(state: String = "") = Action {
     val transactions = Await.result(transactionDao.all(), 5 minutes)
     val stateCount = collection.mutable.Map[String, Int]()
     transactions.map { t =>
@@ -86,6 +84,15 @@ class HomeController @Inject()(
     else{
       Ok(stateCount.toString())
     }
+  }
+
+  def getTransactionsForState(state: String = "") = Action {
+    if(state==null||state.isEmpty){
+      BadRequest("Must take a state as an argument")
+    }
+    val transactions = Await.result(transactionDao.findTransactionsByState(state.toUpperCase), 5 minutes)
+    val output: String = s"[$state] has the following transactions:\n${transactions.mkString("\n")}"
+    Ok(output)
   }
 
   def matchTransactions = Action { request =>
