@@ -59,16 +59,14 @@ class HomeController @Inject()(
 
   def getMerchant(id: UUID) = Action {
     val merchant = Await.result(merchantDao.findMerchant(id), 5 minutes)
-    Ok(merchant.toString)
+    val locations = Await.result(locationDao.findLocationsFromMerchant(merchant.id), 5 minutes)
+    val locationsOutput = s"\nMerchant [${merchant.name},${merchant.id}] has the following locations: ${locations.mkString("\n")}"
+    Ok(merchant.toString+locationsOutput)
   }
 
   def getMerchantByName(name: String) = Action {
     val merchants = Await.result(merchantDao.findMerchantsByName(name), 5 minutes)
-    val merchantsWithLocations = merchants.map { m =>
-      val locations = Await.result(locationDao.findLocationsFromMerchant(m.id), 5 minutes)
-      s"Merchant [$name] has the following locations: ${locations.mkString("\n")}"
-    }
-    Ok(merchantsWithLocations.mkString("\n\n"))
+    Ok(merchants.mkString("\n"))
   }
 
   def getTransactionStateCount(state: String = "") = Action {
