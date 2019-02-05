@@ -65,7 +65,7 @@ class HomeController @Inject()(
   }
 
   def getMerchantByName(name: String) = Action {
-    val merchants = Await.result(merchantDao.findMerchantsByName(name), 5 minutes)
+    val merchants = Await.result(merchantDao.findMerchantsByName(name.toUpperCase), 5 minutes)
     Ok(merchants.mkString("\n"))
   }
 
