@@ -20,4 +20,4 @@ POST    /transactions/match         controllers.HomeController.matchTransactions
 POST    /transactions/unmatch       controllers.HomeController.unmatchTransactions
 
 GET     /merchants/get/:id          controllers.HomeController.getMerchant(id: java.util.UUID)
-GET     /merchants/name/:name  controllers.HomeController.getMerchantByName(name)
+GET     /merchants/name/:name       controllers.HomeController.getMerchantByName(name)
